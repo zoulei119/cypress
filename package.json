@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "cypress": "^8.3.0"
+  },
+  "scripts": {
+    "cypress": "cypress run --headless"
   }
 }

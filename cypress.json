@@ -1,1 +1,10 @@
-{}
+{
+  "projectId": "anmeer",
+  "viewportWidth": 1100,
+  "viewportHeight": 800,
+  "env": {
+    "baseUrl":  "http://localhost/#"
+  },
+  "baseUrl3": "http://localhost/#",
+  "baseApi":  "http://127.0.0.1/train"
+}
