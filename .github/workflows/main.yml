@@ -1,36 +1,50 @@
-# This is a basic workflow to help you get started with Actions
+// .gitlab-ci.yml
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
 
-name: CI
+stages:
+  - test
+  - sonar
 
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+cache:
+  paths:
+  - .npm
+  - node_modules/
+  - cache/Cypress
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+build:
+  stage: sonar
+  tags:
+    - docker
+  script:
+    - yarn
+    - sh ci/sonar.sh
+    - yarn build
+  artifacts:
+    expire_in: 7 day
+    paths:
+      - codeclimate.json
+      - build
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+cypress-e2e-local:
+  image: cypress/base:10
+  tags:
+    - docker
+  stage: test
+  script:
+    - unset NODE_OPTIONS
+    - yarn
+    - $(npm bin)/cypress cache path
+    # show all installed versions of Cypress binary
+    - $(npm bin)/cypress install
+    - $(npm bin)/cypress cache list
+    - $(npm bin)/cypress verify
+    - npm run test
+  artifacts:
+    expire_in: 1 week
+    when: always
+    paths:
+    - coverage/lcov.info
+    - cypress/screenshots
+    - cypress/videos
